@@ -1,0 +1,126 @@
+---
+title: "Basic Data Manipulation, Exploration and Visualisation in R"
+author: "Data, Algorithms and Meaning"
+date: "05/01/2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Installation and Introduction
+
+R is a free software environment for statistical computing and graphics.  It has become one of the major tools for data scientists worldwide, largely due to its huge range of powerful packages, state of the art methods, and huge user community.
+
+Make sure that you first have R installed.  You can download R on mac, windows or linux here:
+http://cran.csiro.au
+
+We recommend RStudio as an IDE for R (Integrated Development Environment).  You can download it here:
+https://www.rstudio.com/products/rstudio/download/
+
+There is a wealth of information and tutorials online regarding R and Rstudio.  Feel free to browse the following links:
+
+* A (very) short introduction to R:  https://cran.r-project.org/doc/contrib/Torfs+Brauer-Short-R-Intro.pdf
+* Introduction to R and RStudio video:  https://www.youtube.com/watch?v=lVKMsaWju8w
+* RStudio introduction video:  https://www.youtube.com/watch?v=jPk6-3prknk
+
+
+## R Basics
+
+In this exercise, we are going to introduce some of R's core concepts.  Open up RStudio.  
+
+### Built in Data Sets
+
+Firstly, R comes with a number of data sets preloaded.  To view these data sets, type the following command into the console.  
+
+```{r data, eval=FALSE}
+data()
+```
+
+You should see a table of data sets appear, with the data set name in the left column, and a short description in the right column. Because these data sets are built into the core R environment, simply typing the name of the data set will display the results in the console.  For example, type the following into the console and press enter:
+
+```{r AirPassengers}
+AirPassengers
+```
+
+The data set called _AirPassengers_ is a time series of air passenger numbers per month.  There are many more data sets built in which we will work on.  The command __data()__ only lists a subset.  To list all the data, we add an argument to the function 'data()' as follows:
+
+```{r data2, eval=FALSE}
+data(package = .packages(all.available = TRUE))
+```
+
+### Viewing Data
+
+Listed in this new output is a data set called _mtcars_, described as 'Motor Trend Car Road Tests'.  Let's have a look at the top 6 rows of this data set (using the __head()__ function):
+
+```{r head}
+head(mtcars)
+```
+
+This data set has a variety of data types, including the car name as a character string, numeric values, categorical values and ordinal values.  To store data with different data types in different columns, we use a _data frame_.  To see that this data is stored as a data frame, we can examine the structure of the _mtcars_ data set using the __str()__ function:
+
+```{r str}
+str(mtcars)
+```
+
+The first line of output tells use that this data set is a 'data.frame', with 32 observations (rows) and 11 variables (columns).  The rest of the output gives each variable name (preceded by a $, which we'll come back to), the data type (num), and the top 10 observations.  Normally someone would now ask "What happened to the car names?".  Good question!  In this data set, they are actually stored as row names, rather than a specific variable.  Just as variables have names, in R rows have names too.  It's easy to list them both:
+
+```{r rowscols}
+rownames(mtcars)
+colnames(mtcars)
+```
+
+We can also produce a __summary()__ of the data set.  This function produces a number of descriptive statistics for each variable:
+```{r summary}
+summary(mtcars)
+```
+
+### Data Types
+
+Once we've examined the data frame, the next step in any analysis is to ensure that each variable is stored in the correct data type. Even though all of our variables are numbers and are stored as _num_, we don't necessarily want to work with them all as numberic variables.  For instance, the column _cyl_ refers to the number of cylinders of the vehicle.  This is rightly an ordinal variable, meaning that it is categorical with distinct values, but is order has meaning.  On the other hand, _am_ refers to the transmission of the vehicle.  It is 1 if the car is an automatic, 0 if manual.  This is a binary flag, so is categorical.
+
+In R, the most common data types that you will come across are numeric (num), integers (int), character strings (char), dates and factors.  Sometimes, if a variable is numeric or integer but is actually ordinal, we can choose to represent it as a number that we can calculate on or a factor (i.e. categorical variable).  In the _mtcars_ example, we will choose to store all ordinal variables to factors for reasons that will become clear.
+
+We will now modify the data to our desired data types.  Firstly, let's copy the data set to our working environment.  We will store the _mtcars_ data to a new data frame called _data_.  There are two ways to do this in R, both equivalent:  We can use the operator __=__ or __-<__.  Which one you use is up to you, but for the rest of this tutorial we will use the __=__ operator:
+
+```{R assignment}
+data = mtcars
+data <- mtcars
+```
+
+We have now created a data frame called _data_ in our working environment.  To refer to a specific variable of a data.frame, we can use the $ operator after the data frame name.  We can then assign new values, so long as we are assigning the same number of values.  We are going to convert the variable _cyl_ to a factor, making it categorical.  We can do this with the __as.factor()__ function:
+```{R cyl}
+data$cyl = as.factor(data$cyl)
+```
+You can check that the change was made by running the __str()__ function on this variable:
+```{R strvar}
+str(data$cyl)
+```
+R now tells us that the variable is a factor with 3 levels (i.e. values) "4", "6", "8".  These values are encoding as increasing integers starting from 1:  values "4", "6", "8" become codes 1, 2, 3.  Note that R treats the levels of a factor variable as character strings.
+
+Now we will convert the other categorical variables to factors:
+```{R factors}
+data$vs = as.factor(data$vs)
+data$am = as.factor(data$am)
+data$gear = as.factor(data$gear)
+data$carb = as.factor(data$carb)
+```
+
+Lastly, let's create a variable for the car name.  Creating a new variable is easy - we simply assign values to a new variable name on the data frame _data_ as follows.  Note that the following works since _rownames(data)_ has the same number of values as the data frame has rows:
+```{R carname}
+data$carname = rownames(data)
+```
+We can now remove the row names by assigning __NULL__:
+```{R row_names_remove}
+rownames(data) = NULL
+```
+To check that everything has worked, we can run the __str()__ or __summary()__ functions on our data.  Let's run __summmary()__, where we see that for factors the function gives us a count of each level:
+```{R summary2}
+summary(data)
+```
+
+
+
+
+
