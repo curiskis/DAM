@@ -10,55 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir = "~/uts/DAM")
 ```
 
-# Setting up your R environment
-
-This first section will cover the basics of package management, working directories and reading / writing data from disk, basic essentials to working with R.
-
-## Package Management
-
-At the time of writing, R has 10,164 additional packages that can be installed.  Some of these packages are extremely useful, while others are incredibly specific on their application.  This huge amount of extended functionality is not installed by default when you first install R.  Instead, you need to manually install each package when you wish to use it.  There are two steps in this process.  To illustrate, we will install [Hadley Wickam's](http://hadley.nz/) celebrated [ggplot2](http://ggplot2.org/) package.
-
-The first step is to install the package to your local package directory using __`install.packages("")`__:
-```{R install, eval=FALSE}
-install.packages("ggplot2")
-```
-This downloads and unpacks the relevant files to your local package repository.  You only ever need to run this once on your machine. There is an additional step before we can use this package, though: we must load it to memory.
-```{R mem}
-library(ggplot2)
-require(ggplot2)
-```
-Both of these commands are equivalent.  Note that when we install a package, we must pass the package name in double quotes, but this is not required to load the package to memory.  We will return to the ggplot2 package later in this exercise.
-
-## Working Directory
-
-We need to tell R explicitly where on our hard drive we want to work.  The __`setwd()`__ command will do this.  For example,
-```{R setwd}
-setwd("/home/stephan/uts/DAM")
-```
-To check that we have set our working directory correctly, we can run __`getwd()`__:
-```{R getwd}
-getwd()
-```
-To list all the files in our working directory, we can run __`list.files()`__:
-```{R list.files}
-list.files()
-```
-Notice that the list of files in our working directory is stored as a vector.  This can come in handy if we wish to import a whole set of files, one after the other.  
-
-## Reading and Writing Data
-Let's read in some data from disk.  You should download the file __diamonds.csv__ from UTSOnline.  The two main functions to read in data are __`read.csv()`__ and __`read.table`__.  The key difference is that `read.csv()` can only read csv files, while `read.table()` can handle other formats, such as txt files.  We can read our file in one of two ways.  Note that we are assigning the data to an object:
-```{R read, eval=T}
-data = read.csv("diamonds.csv", header = TRUE)
-data = read.table("diamonds.csv", sep = ",", header = TRUE)
-```
-
-To export data, we can similarly use the following functions:
-```{R write, eval = F}
-write.csv(data, file = "diamonds.csv")
-write.table(data, file = "diamonds.csv", sep = ",")
-```
-We can also write to other formats, such as excel.  However, we generally need to install additional packages to do this.
-
 
 # Further Data Manipulation
 
@@ -104,7 +55,15 @@ moments(numbers)
 
 
 ## Aggregation
-Throughout the usual process of preparing data for analysis, we commonly need to do some aggregation.  This involves calculting some measures of numeric variables (or even counting rows), aggregating (or grouping) over some factors.  For those familiar with Excel, this is the same as using a pivot table.  In R we easily do this by using the __`aggregate()`__ function.  We will start by calculating the average carat for each cut:
+Throughout the usual process of preparing data for analysis, we commonly need to do some aggregation.  This involves calculting some measures of numeric variables (or even counting rows), aggregating (or grouping) over some factors.  For those familiar with Excel, this is the same as using a pivot table.  In R we easily do this by using the __`aggregate()`__ function.  
+
+Let's load the diamonds data set, which you can download from UTSOnline.  Again, to read a csv file in from disk, we can use either the `read.csv()` or `read.table()` functions as follows:
+```{R read, eval=T}
+data = read.csv("diamonds.csv", header = TRUE)
+data = read.table("diamonds.csv", sep = ",", header = TRUE)
+```
+
+We will start by calculating the average carat for each cut:
 ```{R aggregate}
 aggregate(formula = carat ~ cut, data = data, FUN = mean)
 ```

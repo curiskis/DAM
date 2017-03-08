@@ -9,7 +9,9 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# R Installation and Introduction
+# R Introduction
+
+## Installation
 
 R is a free software environment for statistical computing and graphics.  It has become one of the major tools for data scientists worldwide, largely due to its huge range of powerful packages, state of the art methods, and huge user community.
 
@@ -24,6 +26,43 @@ There is a wealth of information and tutorials online regarding R and Rstudio.  
 * A (very) short introduction to R:  https://cran.r-project.org/doc/contrib/Torfs+Brauer-Short-R-Intro.pdf
 * Introduction to R and RStudio video:  https://www.youtube.com/watch?v=lVKMsaWju8w
 * RStudio introduction video:  https://www.youtube.com/watch?v=jPk6-3prknk
+
+The rest of this section will cover the basics of package management, working directories and reading / writing data from disk, basic essentials to working with R.
+
+## Package Management
+
+At the time of writing, R has 10,164 additional packages that can be installed.  Some of these packages are extremely useful, while others are incredibly specific on their application.  This huge amount of extended functionality is not installed by default when you first install R.  Instead, you need to manually install each package when you wish to use it.  There are two steps in this process.  To illustrate, we will install [Hadley Wickam's](http://hadley.nz/) celebrated [ggplot2](http://ggplot2.org/) package.
+
+The first step is to install the package to your local package directory using __`install.packages("")`__:
+```{R install, eval=FALSE}
+install.packages("ggplot2")
+```
+This downloads and unpacks the relevant files to your local package repository.  You only ever need to run this once on your machine. There is an additional step before we can use this package: we must load it to memory.
+```{R mem}
+library(ggplot2)
+require(ggplot2)
+```
+Both of these commands are equivalent.  Note that when we install a package, we must pass the package name in double quotes, but this is not required to load the package to memory.  We will return to the ggplot2 package later in the second exercise.
+
+## Working Directory
+
+We need to tell R explicitly where on our hard drive we want to work.  The __`setwd()`__ command will do this.  For example, 
+```{R setwd, eval=F}
+# Mac and Linux
+setwd("~/DAM/Pre-work")
+# Windows
+setwd("C:\User\(username)\Documents\DAM\Pre-work")
+```
+To check that we have set our working directory correctly, we can run __`getwd()`__:
+```{R getwd, eval = F}
+getwd()
+```
+To list all the files in our working directory, we can run __`list.files()`__:
+```{R list.files}
+list.files()
+```
+Notice that the list of files in our working directory is stored as a vector.  This can come in handy if we wish to import a whole set of files, one after the other.  Also note that your list of files will be different!
+
 
 
 # R Basics
@@ -62,19 +101,19 @@ Finally, there are some great functions to generate useful vectors in R.  The __
 seq(from = 1, to = 20, by = 1)
 ```
 
-To bring up the help documentation for a function in R, you can either run __`help()`__, or put a __`?`__ in front of the function name. Both are equivalent:
+The inputs to a function in R are also known as 'arguments'.  To call a function you simply type the function name, followed by parentheses, with arguments given within the parantheses.  In the example above, we have explicity named the arguments (`from = 1, to = 20, ...`).  When using a function for the first time (or even one you've used many times but forgotten some of the arguments), it is handy to bring up the associated help file.  To bring up the help documentation for a function in R, you can either run __`help()`__, or put a __`?`__ in front of the function name. Both are equivalent:
 ```{R help}
 help(seq)
 ?seq
 ```
 
-There is a commonly used shorthand for __`seq()`__ where the _`by`_ increment is always 1:
+There is a commonly used shorthand for __`seq()`__ where the __`by`__ increment is always 1:
 ```{R :}
 1:20
 ```
-We can also create a vector of a value replicate any number of times using __`rep()`__:
+We can also create a vector of a value replicated any number of times using __`rep()`__:
 ```{R rep}
-rep(1, 20)
+rep(x = 1, times = 20)
 ```
 
 ### Data Frames
@@ -83,14 +122,18 @@ The most commonly used object in R is the data frame.  Put simply, a data frame 
 ```{R df}
 data.frame(1:10, seq(1, 20, 2), rep("letters", 10))
 ```
-Note that the arguments to functions like __`seq()`__ and __`rep()`__ do not need to be named explicitly (e.g. from = ...).  However, if you do not name them then you must input them in the same order as the documentation.  Note also that R has given each column (or variable) a name in line with the vector definition. We usually rename the variables in our data frames to something nicer.  There are a few equivalent ways to do this: __`setNames()`__, with our data frame as the input, we can assign a name to each vector input to the data frame, or assign a new vector to __`colnames()`__, again with our data frame as the input (this third option requires that we assign the data frame to an object, explained in the next section):
+Note that the arguments to functions like __`seq()`__ and __`rep()`__ do not need to be named explicitly (e.g. `from = ...`).  However, for functions if you do not name them then you must input them in the same order as the documentation.  In this case, since we are defining a new data frame, R has given each column (or variable) a name in line with the vector definition. We usually rename the variables in our data frames to something nicer.  There are a two equivalent ways to do this: 
+
+Using __`setNames(data_frame)`__ with our data frame as the input, we can assign a name to each vector input to the data frame.
 ```{R df2, eval=FALSE}
 setNames(object = data.frame(1:10, seq(1, 20, 2), rep("letters", 10)),
          nm = c("seq_1","seq_2", "letters"))
 ```
+We can assign variable names when we create the data frame by naming each of our column vectors:
 ```{R df 3}
 data.frame(seq_1 = 1:10, seq_2 = seq(1, 20, 2), letters = rep("letters", 10))
 ```
+Both of these methods will give us the same result.
 
 ### Built in Data Sets
 
@@ -126,7 +169,7 @@ This data set has a variety of data types, including the car name as a character
 str(mtcars)
 ```
 
-The first line of output tells use that this data set is a 'data.frame', with 32 observations (rows) and 11 variables (columns).  The rest of the output gives each variable name (preceded by a $, which we'll come back to), the data type (num), and the top 10 observations.  Normally someone would now ask "What happened to the car names?".  Good question!  In this data set, they are actually stored as row names, rather than a specific variable.  Just as variables have names, in R rows have names too.  It's easy to list them both:
+The first line of output tells us that this data set is a `'data.frame'`, with `32 observations` (rows) and `11 variables` (columns).  The rest of the output gives each variable name (preceded by a `$`, which we'll come back to), the data type (`num`), and the top 10 observations.  Normally someone would now ask 'What happened to the car names?'.  Good question!  In this data set, they are actually stored as row names, rather than a specific variable.  Just as variables have names, in R rows have names too.  It's easy to list them both:
 
 ```{r rowscols}
 rownames(mtcars)
@@ -160,7 +203,7 @@ You can check that the change was made by running the __`str()`__ function on th
 ```{R strvar}
 str(data$cyl)
 ```
-R now tells us that the variable is a factor with 3 levels (i.e. values) `"4", "6", "8"`.  These values are encoded as increasing integers starting from 1:  values `"4", "6", "8"` become codes `1, 2, 3`.  Note that R treats the levels of a factor variable as character strings.
+R now tells us that the variable is a factor with 3 levels (i.e. values) `"4", "6", "8"`.  These values are encoded as increasing integers starting from 1;  values `"4", "6", "8"` become codes `1, 2, 3`.  Note that R treats the levels of a factor variable as character strings.
 
 Now we will convert the other categorical variables to factors:
 ```{R factors}
@@ -185,7 +228,7 @@ summary(data)
 
 ### Subsetting
 
-To take a subset of a vector in R, we use square brackets to the right of our object (__`vector[ ]`__).  Within the square brackets, we enter the vector element indices we wish to subset.  This index always starts from 1.  For example, lets create a vector called `x` with values of `1` to `10`, incremented by `1`.  We will then use the square bracket notation to extract the 3rd, 4th, 5th and 9th values.  Note how we can use create a concatenated vector of indices (`c(3:5, 9)`):
+To take a subset of a vector in R, we use square brackets to the right of our object (__`vector[ ]`__).  Within the square brackets, we enter the vector element indices we wish to subset.  This index always starts from 1.  For example, lets create a vector called `x` with values of `1` to `10`, incremented by `1`.  We will then use the square bracket notation to extract the 3rd, 4th, 5th and 9th values.  Note how we can create a concatenated vector of indices (`c(3:5, 9)`):
 ```{R vector subset}
 x = 1:10
 x[c(3:5, 9)]
@@ -206,12 +249,30 @@ To view the first 3 rows of the first 3 columns, we would simply execute:
 data[1:3, 1:3]
 ```
 
-The other common way to subset data frames is to explicitly use the row or column names.  Remember that in R, every value is defined as a vector.  If we want to subset by multiple rows or columns, we must give their names as a vector.  For instance, 
+The other common way to subset data frames is to explicitly use the row or column names.  Remember that in R, every value is defined as a vector.  If we want to subset by multiple rows or columns, we must give their names as a vector (using `c()` or another function which outputs a vector).  For instance, 
 
 ```{R subset 4}
 data[1:3, c("mpg", "cyl", "disp")]
 ```
 We removed the rownames of our data frame earlier, so R defaults to numeric indices.  
+
+
+## Reading and Writing Data
+Let's read in some data from disk.  You should download the file __diamonds.csv__ from UTSOnline.  The two main functions to read in data are __`read.csv()`__ and __`read.table()`__.  The key difference is that `read.csv()` can only read csv files, while `read.table()` can handle other formats, such as txt files, but also requires more arguments.  We can read our file in one of two ways.  Note that we are assigning the data to an object called `data` (`data = read...`):
+```{R read, eval=F}
+diamonds_data = read.csv("diamonds.csv", header = TRUE)
+diamonds_data = read.table("diamonds.csv", sep = ",", header = TRUE)
+```
+
+The first argment is the file name.  We can actually specify the full path to the file on our hard drive, but if our file is stored in our working directory we can just provide the file name.  The argument `header = TRUE` tells R that our file has a row of column headings.  In `read.table()`, the argument `sep = ","` is telling R that our column delimiter is a comma; if our file was tab delimited, we would use `sep = "\t"` instead.  
+
+To export data, we can similarly use the following functions:
+```{R write, eval = F}
+write.csv(diamonds_data, file = "diamonds.csv")
+write.table(diamonds_data, file = "diamonds.csv", sep = ",")
+```
+We can also write to other formats, such as excel.  However, we generally need to install additional packages to do this.
+
 
 # Visualisation
 
@@ -237,8 +298,8 @@ Histograms are good for plotting the distribution of a single variable, but comm
 ```{R plot help}
 ?plot
 ```
-Under the __Usage__ section, we see that __`plot()`__ takes two arguments, __`x`__ and __`y`__.  There are also some optional arguments that can modify the type of plot.  The default is to produce a scatterplot.  Let's try this with the variables `mpg` (miles per gallon) and `disp` (engine displacement). Note that we can always specify explicity which argument we are giving R (e.g. x = ..., y = ...), or we can get lazy and not specify the argument as long as the order we supply the arguments is the same as the order in the function's documentation.
-```{R plot 1}
+Under the __Usage__ section, we see that __`plot()`__ takes two arguments, __`x`__ and __`y`__.  There are also some optional arguments that can modify the type of plot.  The default is to produce a scatterplot.  Let's try this with the variables `mpg` (miles per gallon) and `disp` (engine displacement). Note that we can always specify explicity which argument we are giving R (e.g. `x = ..., y = ...`), or we can get lazy and not specify the argument as long as the order in which we supply the arguments is the same as the order in the function's documentation.
+```{R plot 1, eval = T}
 plot(x = data$disp, y = data$mpg,
      main = "Miles per gallon against Displacement",
      xlab = "Displacement",
