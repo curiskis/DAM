@@ -62,24 +62,29 @@ Let's load the diamonds data set, which you can download from UTSOnline.  Again,
 data = read.csv("diamonds.csv", header = TRUE)
 data = read.table("diamonds.csv", sep = ",", header = TRUE)
 ```
+When you first load a data set into R, it is important to check the structure.  It's good to confirm that all the rows and columns we expect have been loaded, but also it is important to check that R has interpreted the data types of our columns correctly.  Again, we use the `str()` function:
+```{R str}
+str(data)
+```
+In this case, we are looking to see whether our categorical variables have been cast as the `Factor` data type.  Commonly numeric variables can be incorrectly set to `Factors` as well. In this case, our only factors are `cut, color` and `clarity` which is correct.  
 
 We will start by calculating the average carat for each cut:
 ```{R aggregate}
 aggregate(formula = carat ~ cut, data = data, FUN = mean)
 ```
-The __`aggregate()`__ function requires three key arguments.  The first is __formula__, which we saw previously while doing some plotting.  This object comes up again and again in all sorts of R functions, most notably with models.  It's just a way to specify which variables we want to use, and in what way - you generally need to look up the documentation of the function to see how to specify the formula.  In the case of __`aggregate()`__, the variables we wish to be calculated are on the left of the tilda (~), while those on the right are grouping factors.  The second argument is just our data frame, and the last argument (ironically named as __`FUN`__) specifies how we want our measures to be calculated.  We can use any standard numeric aggregate function (e.g. mean, sd, sum), but can also specify our own functions.
+The __`aggregate()`__ function requires three key arguments.  The first is __formula__, which we saw previously while doing some plotting.  This object comes up again and again in all sorts of R functions, most notably with models.  It's just a way to specify which variables we want to use, and in what way - you generally need to look up the documentation of the function to see how to specify the formula.  In the case of __`aggregate()`__, the variables we wish to be calculated are on the left of the tilda (`~`), while those on the right are grouping factors.  The second argument is just our data frame, and the last argument (ironically named as __`FUN`__) specifies how we want our measures to be calculated.  We can use any standard numeric aggregate function (e.g. mean, sd, sum), but can also specify our own functions.
 
-The example above is very simple, so lets go a bit further.  We might wish to calculate the mean of several numeric variables.  To do this, we need to use the __`cbind()`__ function to collect them together, then pass this to the formula on the left of the tilda:
+The example above is very simple, so lets go a bit further.  We might wish to calculate the mean of several numeric variables.  To do this, we need to use the __`cbind()`__ function to collect our numeric variables together, then pass this to the formula on the left of the tilda:
 ```{R aggregate2}
 aggregate(formula = cbind(carat, depth, price, x, y, z) ~ cut, data = data, FUN = mean)
 ```
-We might then wish to add another grouping variable, to see how the means vary over combinations of two variables.  In the formula, we simply use __+__ to add additional grouping variables.  Let's try it with __color__ and __clarity__.  We will also store the result in a data frame, `aggr`, and output the top 10 rows:
+We might then wish to add another grouping variable, to see how the means vary over combinations of two variables.  In the formula, we simply use __`+`__ to add additional grouping variables.  Let's try it with __color__ and __clarity__.  We will also store the result in a data frame, `aggr`, and output the top 10 rows:
 ```{R aggregate3}
-aggr = aggregate(formula = cbind(carat, depth, price, x, y, z) ~ cut + color + clarity, data = data, 
-                 FUN = mean)
+aggr = aggregate(formula = cbind(carat, depth, price, x, y, z) ~ cut + color + clarity, 
+                 data = data, FUN = mean)
 head(aggr, 10)
 ```
-If we want to order our data frame by a variable, we can use the `order` function applied to the rows index in the data frame. The first argument is the variable name which we want to sort by, and the second argument is whether we want to sort by decreasing or not.  This is handy to remember. E.g., here are the top 6 rows of `aggr` in descending order by `carat`:
+If we want to order our data frame by a variable, we can use the __`order()`__ function applied to the rows index in the data frame. The first argument is the variable name which we want to sort by, and the second argument is whether we want to sort by decreasing or not.  This is handy to remember. E.g., here are the top 6 rows of `aggr` in descending order by `carat`:
 ```{R order}
 head(aggr[order(aggr$carat, decreasing = T), ])
 ```
@@ -94,11 +99,11 @@ Note how R preserves the variable's name by adding the calculation name, `carat.
 
 # Advanced Data Visualisation
 
-We covered some basic data visualisation last week using the built in `graphics` library.  Now we will look at some more advanced visualisation using `ggplot2` and interactive visualisations using `shiny`.
+We covered some basic data visualisation last week using the built-in `graphics` library.  Now we will look at some more advanced visualisation using `ggplot2` and interactive visualisations using `shiny`.  We will start with the function `qplot` in the `ggplot2` package.
 
 ## qplot
 
-ggplot can produce some very impressive visualisations in R, but it can be difficult to get a grips on the syntax.  It is based around the gramar of graphics.  Luckily, there is a lot of material online to help you through this (e.g. http://docs.ggplot2.org/current/).  We'll start by using the simplified __`qplot()`__ function (quickplot), which is designed to be a ggplot shortcut with syntax similar to `plot`.  To begin, we load `ggplot2` to memory.
+ggplot can produce some very impressive visualisations in R, but it can be difficult to get a grips on the syntax.  It is based around what has been called the 'grammar of graphics'.  Luckily, there is a lot of material online to help you through this (e.g. http://docs.ggplot2.org/current/).  We'll start by using the simplified __`qplot()`__ function (quickplot), which is designed to be a ggplot shortcut with syntax similar to `plot`.  To begin, we load `ggplot2` to memory.
 ```{R ggplot2_library}
 library(ggplot2)
 ```
@@ -106,14 +111,17 @@ library(ggplot2)
 ```{R qplot}
 qplot(x = carat, data = data, geom = "auto")
 ```
+
 Success! `qplot` has determined that since `carat` is a numeric variable, it should plot a histogram to show us the distribution.  Let's go a bit further and add a `fill` argument to the plot, passing the factor variable `clarity`.  This will create a stacked histogram:
 ```{R qplot2}
 qplot(x = carat, data = data, geom = "auto", fill = clarity)
 ```
-Instead of a histogram, we might want to plot a density distribution.  Think of this as a histogram with very narrow bins, and a smoothed curve.  Density plots tend to show more detail than a histogram, and it is generally easier to compare distributions split by a factor.  To create one, we just change the `geom` to be `"density"`. The last parameter, `alpha`, just species how transparent our filled colours are. 
+
+Instead of a histogram, we might want to plot a density distribution.  Think of this as a histogram with very narrow bins and a smoothed curve.  Density plots tend to show more detail than a histogram, and it is generally easier to compare distributions split by a factor.  To create one, we just change the `geom` to be `"density"`. The last parameter, `alpha`, just species how transparent our filled colours are. 
 ```{R qplot3}
 qplot(x = carat, data = data, geom = "density", fill = clarity, alpha = I(0.25))
 ```
+
 Lastly, we might want to look at a scatter plot of `carat` against `price`, coloured by the `color`.  We can also add a chart title using the `main` argument.  Note that there are over 50,000 data points in this plot:
 ```{R qplot4}
 qplot(x = carat, y = price, data = data, geom = "point", color = clarity,
@@ -128,6 +136,7 @@ Let's start with the core `ggplot` syntax.
 ```{R ggplot_syntax, eval=F}
 ggplot(data, aes()) + geom()
 ```
+
 There are three core elements to any `ggplot` graph.  The first is your data set. The second is the __aesthetics__, __`aes()`__.  This encodes what variables in your data set you wish to display, and where you wish to display them.  The third component is the __`geom()`__, the __geometry__.  The geometry defines the actual graphical elements displayed in the plot.
 
 It's easier to understand with an example.  The `ggplot` code below reproduces the last `qplot` we created.  The `qplot` code is given for reference. 
@@ -136,12 +145,14 @@ ggplot(data = data, aes(x = carat, y = price, color = clarity)) + geom_point()
 # qplot code for reference
 qplot(x = carat, y = price, data = data, geom = "point", color = clarity)
 ```
+
 Both lines of code might look similar and definitely perform the same function.  However, it is very easy to extend the `ggplot` plot with additional geometries.  In the plot, it looks like there might be a difference in the relationship between `price` and `carat` for different `color` values.  We can determine if this is the case by overlaying trend lines.  We will overlay a trend line geometry using `geom_smooth`, letting R choose a method automatically.
 ```{R ggplot_qplot2, eval = T}
 ggplot(data = data, aes(x = carat, y = price, color = clarity)) + geom_point() +
   geom_smooth(method = "auto")
 ```
-There is a very distinct line for `clarity = I1` which is much less steep then the others.  Judging from the plot, it might be worthwhile creating separate plots for each value of `clarity`.  This is known as 'faceting' the plot, and we can add the term `facet_wrap( ~ clarity)`.  The `wrap` part just tells R to wrap the individual plots over multiple rows to be readable. The argument, `~ clarity` tells R that we want to create separate plots for each value of `clarity`.  We can facet by additional variables by adding more into the expression.  While we're at it, we can also color the plot by `cut` to see visually if there is any clear effect from the cut type.  
+
+There is a very distinct line for `clarity = I1` which is much less steep then the others.  Judging from the plot, it might be worthwhile creating separate plots for each value of `clarity`.  This is known as 'faceting' the plot, and we can add the term `facet_wrap( ~ clarity)` to do this.  The `wrap` part just tells R to wrap the individual plots over multiple rows to be readable. The argument `~ clarity` tells R that we want to create separate plots for each value of `clarity`.  We can facet by additional variables by adding more into the expression.  While we're at it, we can also colour the plot by `cut` to see visually if there is any clear effect from the cut type.  
 
 ```{R ggplot_qplot3, eval = T}
 ggplot(data = data, aes(x = carat, y = price, color = cut)) + 
@@ -150,15 +161,75 @@ ggplot(data = data, aes(x = carat, y = price, color = cut)) +
 
 Often while running `ggplot`, R will warn you about certain things.  These warnings are usually to do with a failure to produce everything you wanted.  While they are not severe enough to create an error and abort the code execution, certain features may not have been produced.  In this case, R warns us that `stat_smooth()` failed somewhere.  Looking at the plot, we can see that there are no smoothed lines for the `clarity` value `IF`.  
 
-Overall, this visualisation is starting to make the relationship between price, carat and other variables more clear.  We'll leave it there with `ggplot`.  Mastering this library takes time and patience, and lots of google searches, but is well worth it in the end.  For documentation around the range of functions, as well as some additional demonstrations, the following links might be useful:
+Overall, this visualisation is starting to make the relationship between `price`, `carat` and other variables more clear.  We'll leave it there with `ggplot`.  Mastering this library takes time and patience, and lots of google searches, but is well worth it in the end.  For documentation around the range of functions, as well as some additional demonstrations, the following links might be useful:
+
 * http://docs.ggplot2.org/current/
 * http://www.statmethods.net/advgraphs/ggplot2.html
 * http://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html
 
 ## Shiny
 
-The last section in this exercise involves the `shiny` package.  `shiny` is produced by RStudio, who you should be familiar with by now! You should have a look at their website, which has some very simple examples of some `shiny` web applications.  https://shiny.rstudio.com/
+The last section in this exercise involves the `shiny` package.  This is purely optional and is included to demonstrate how useful R can be for exploring visual data interactively.  `Shiny` is produced by RStudio, who you should be familiar with by now! 
 
+`Shiny` basically creates a web-based interactive visualisation using R graphics libraries.  It can be viewed as a pop-up in RStudio, or opened directly into a web browser.  A `shiny` application can even be hosted on a website, but be sure to check the licensing before doing this.  It is a free tool for our current use cases, but there may be a cost if it's deployed commercially.  
 
+There are two core components to a `shiny` application, the user interface (UI) and the server.  The UI is where the user can interact with the visualisation - interactions can be selected variables, changing parameters, changing the plot type, filtering, etc.  The UI function displays these options in the application, and stores the selected values.  
 
+The server function is where the bulk of the work is done.  Generally, this will involve creating a visualisation, but sometimes doing some data manipulation as well.  Input values selected by the user in the UI are passed to the server function, which can then filter the data set, or modify the output in some way.  Have a look at the `shiny` website to see a simple example:
+
+* https://shiny.rstudio.com/
+
+We are now going to build our own `shiny` application on the diamonds data set.  We first need to install and load the `shiny` package, and we'll also load `ggplot2` just in case:
+```{R shiny, eval = F}
+install.packages("shiny")
+```
+```{R shinyLibary}
+library(shiny)
+library(ggplot2)
+```
+We will use the scatterplot of `price` on the `y` axis and `carat` on the `x` axis as the main plot, with a selection on which categorical variable colours the points.  Firstly, we will define our UI function.
+
+```{R ui, eval = T}
+ui = shinyUI(bootstrapPage(
+  # selectInput is a function for creating a simple selection.  Display a trend line?
+  selectInput(inputId = "line",
+              label = "Display trend line?",
+              choices = c("yes","no"),
+              selected = "yes"),
+  # filter by values of clarity variable
+  selectInput(inputId = "clarity_filter",
+              label = "Select clarity values to filter",
+              choices = unique(data$clarity),
+              selected = unique(data$clarity)[1]),
+  
+  # display the plot which we will define in the server 
+  plotOutput(outputId = "main_plot")
+))
+```
+
+This is a basic UI function.  It allows us to select from three variable choices, `cut`, `color` or `clarity`.  The default selected variable is `clarity`.  The `inputId` specifies what this input is called in our code, and the `label` is what will appear to the user.  `shinyUI()` specifes that this is the UI component of our application.  `bootstrapPage()` is another shiny function that specifies the basic layout of our application.  Lastly, the `plotOutput()` part is telling R that we will have a plot output called `main_plot` and we want to display it.  
+
+Now we will define our server function:
+
+```{R server, eval = T}
+server = shinyServer(function(input, output) {
+  # function to create plot and pass to UI
+  output$main_plot = renderPlot({
+    # filter our data set by the carat filter input value
+    data = data[data$clarity == input$clarity_filter, ]
+    # define base plot
+    plot = ggplot(data, aes(x = carat, y = price, color = clarity)) + geom_point() 
+    # if line input is "yes", add a line
+    if (input$line == "yes") {
+      plot = plot + geom_smooth(method = "auto")
+    }
+    # output the plot
+    plot
+  })
+})
+```
+
+```{R shiny_run, eval = F}
+shinyApp(ui, server)
+```
 
