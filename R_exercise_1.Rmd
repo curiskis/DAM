@@ -51,7 +51,7 @@ We need to tell R explicitly where on our hard drive we want to work.  The __`se
 # Mac and Linux
 setwd("~/DAM/Pre-work")
 # Windows
-setwd("C:\User\(username)\Documents\DAM\Pre-work")
+setwd("C:\\User\\(username)\\Documents\\DAM\\Pre-work")
 ```
 To check that we have set our working directory correctly, we can run __`getwd()`__:
 ```{R getwd, eval = F}
@@ -90,11 +90,15 @@ c("a", "b", "c")
 
 Why is it important that R works with vectors?  Because R will execute commands over all elements of the vector.  For instance, adding the number `1` to the vector `(1, 2 ,3)` gives the following:
 ```{R cx}
-c(1, 2, 3) * 1
+c(1, 2, 3) + 1
 ```
-R interprets this command as adding the vector of 1's to the vector `(1, 2, 3)`.  For those who remember their linear algebra, we can also run vector operations easily in R by using the '`%`' notation. For example, the dot product of vectors `(1, 2, 3)`:
+R interprets this command as adding the vector of 1's to the vector `(1, 2, 3)`.  We can also execute other basic mathematical operations over a vector in a similar way.  E.g., 
+```{R cx2}
+c(1, 2, 3) * 2
+```
+Here R will multiple each element in the vector by `2`.  For those who remember their linear algebra, we can also do vector and matrix multiplication easily in R by using the '`%`' notation.  To refresh your memories, the dot product is the sum of the product of the corresponding elements of each vector. For example, the dot product of vectors `(1, 2, 3)` is below (the dot product calculation is illustrated in the comment).
 ```{R c product}
-c(1, 2, 3) %*% c(1, 2, 3)
+c(1, 2, 3) %*% c(1, 2, 3) # = 1*1 + 2*2 + 3*3
 ```
 Finally, there are some great functions to generate useful vectors in R.  The __`seq()`__ function generates a sequence of numbers from a starting number, to an ending number, by a fixed interval.  E.g.
 ```{R seq}
@@ -306,7 +310,7 @@ plot(x = data$disp, y = data$mpg,
      ylab = "Miles per gallon")
 ```
 
-From the plot, it is clear that there is a negative relationship between miles per gallon and displacement.  That is, as engine displacement increases, miles per gallon decreases. To better understand why, we should do some more visualisation. Commonly there might be another variable that is said to 'interact' with a relationship between two other variables.  This means that there is actually a three way relationship or correlation rather than a correlation simply between two variables.  For instance, we could hypothesise that the number of cylinders might interact with displacement and miles per gallon.  In R, there is a function called __`cplot()`__ that can create a faceted plot split by the levels of a factor.  Let's try it:
+From the plot, it is clear that there is a negative relationship between miles per gallon and displacement.  That is, as engine displacement increases, miles per gallon decreases. To better understand why, we should do some more visualisation. Commonly there might be another variable that is said to 'interact' with a relationship between two other variables.  This means that there is actually a three way relationship or correlation rather than a correlation simply between two variables.  For instance, we could hypothesise that the number of cylinders might interact with displacement and miles per gallon.  In R, there is a function called __`coplot()`__ that can create a faceted plot split by the levels of a factor.  Let's try it:
 
 ```{R coplot}
 coplot(formula = mpg ~ disp | as.factor(cyl), data = data,
